@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\mharr\.Rider2019.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\mharr\.Rider2019.3\system\resharper-host\local\Transient\ReSharperHost\v193\SolutionCaches\_SDL2_Tutorials.1451775733.00" t="ExcludeRecursive" />
+    <e p="C:\Users\mharr\Documents\Visual Studio Projects\SDL2_Tutorial\SDL2_Tutorials" t="IncludeFlat">
+      <e p="Debug" t="ExcludeRecursive" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="SDL2_Tutorials" t="IncludeRecursive">
+        <e p="Debug" t="ExcludeRecursive" />
+        <e p="HelloSDL.cpp" t="Include" />
+        <e p="SDL2_Tutorials.vcxproj" t="IncludeRecursive" />
+      </e>
+      <e p="SDL2_Tutorials.sln" t="IncludeFlat" />
+    </e>
+  </component>
+</project>
