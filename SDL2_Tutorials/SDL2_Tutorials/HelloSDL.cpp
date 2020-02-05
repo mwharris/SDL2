@@ -31,12 +31,27 @@ int main(int argc, char* args[])
 			return -1;
 		}
 		else {
-			// Blit our image to the screen
-			SDL_BlitSurface(g_imageSurface, NULL, g_screenSurface, NULL);
-			// Tell SDL to draw our updated surface to the screen
-			SDL_UpdateWindowSurface(g_window);
-			// Wait
-			SDL_Delay(3000);
+			bool quit = false;
+			SDL_Event event;
+
+			// Game loop
+			while (!quit) {				
+				// Event poller
+				while (SDL_PollEvent(&event) != 0) {
+					switch (event.type)
+					{
+						case SDL_QUIT:
+							quit = true;
+							break;
+						default:
+							break;
+					}
+				}
+				// Blit our image to the screen
+				SDL_BlitSurface(g_imageSurface, NULL, g_screenSurface, NULL);
+				// Tell SDL to draw our updated surface to the screen
+				SDL_UpdateWindowSurface(g_window);
+			}
 		}
 	}
 
