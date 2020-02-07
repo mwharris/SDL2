@@ -12,8 +12,8 @@ void close();
 SDL_Surface* loadSurface(string path);
 
 // Screen dimension constants
-const int SCREEN_WIDTH = 1302;
-const int SCREEN_HEIGHT = 768;
+const int SCREEN_WIDTH = 1280;
+const int SCREEN_HEIGHT = 720;
 
 // Key press value to surface constants
 enum KeyPressSurfaces {
@@ -80,7 +80,7 @@ int main(int argc, char* args[]) {
 					}
 				}
 				// Blit our current image to the screen
-				SDL_BlitSurface(g_currentSurface, NULL, g_screenSurface, NULL);
+				SDL_BlitScaled(g_currentSurface, NULL, g_screenSurface, NULL);
 				// Tell SDL to draw our updated surface to the screen
 				SDL_UpdateWindowSurface(g_window);
 			}
@@ -154,12 +154,24 @@ bool loadMedia() {
 }
 
 SDL_Surface* loadSurface(string path) {
-	SDL_Surface* surface = SDL_LoadBMP(path.c_str());
-	if (surface == NULL) {
+	// The optimized surface we will return
+	SDL_Surface* optimizedSurface = NULL;
+	// Load the image BMP via a string path
+	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
+	if (loadedSurface == NULL) {
 		printf("Error while loading BMP file at %s, SDL_GetError: %s \n", path.c_str(), SDL_GetError());
-		return NULL;
 	}
-	return surface;
+	else {
+		// Optimize the loaded surface for our screen
+		optimizedSurface = SDL_ConvertSurface(loadedSurface, g_screenSurface->format, 0);
+		if (optimizedSurface == NULL) {
+			printf("Error while optimizing BMP file at %s, SDL_GetError: %s \n", path.c_str(), SDL_GetError());
+		}
+		// Free the original surface
+		SDL_FreeSurface(loadedSurface);
+		loadedSurface = NULL;
+	}
+	return optimizedSurface;
 }
 
 void close() {
