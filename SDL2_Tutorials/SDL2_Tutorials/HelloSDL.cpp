@@ -1,5 +1,6 @@
 // Include SDL functions and datatypes
 #include <SDL.h>
+#include <SDL_image.h>
 #include <stdio.h>
 #include <string>
 
@@ -91,6 +92,7 @@ int main(int argc, char* args[]) {
 	return 0;
 }
 
+// TODO: refactor this shit to init both SDL and SDL_Image before setting up the SDL Window
 bool init() {
 	// We must initialize SDL with SDL_Init before we can use SDL functions
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -110,9 +112,16 @@ bool init() {
 			printf("Error creating the SDL Window! SDL_GetError: %s \n", SDL_GetError());
 		}
 		else {
-			// Get a reference to the surface our window
-			g_screenSurface = SDL_GetWindowSurface(g_window);
-			return true;
+			// Initialize SDL_image for image loading
+			int imgFlags = IMG_INIT_PNG;
+			if (IMG_Init(imgFlags) != imgFlags) {
+				printf("Error initializing SDL_image! IMG_GetError: %s \n", IMG_GetError());
+			}
+			else {
+				// Get a reference to the surface our window
+				g_screenSurface = SDL_GetWindowSurface(g_window);
+				return true;
+			}
 		}
 	}
 	return false;
@@ -120,31 +129,31 @@ bool init() {
 
 // Load all of our images
 bool loadMedia() {
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] = loadSurface("Images/bnh_default.bmp");
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] = loadSurface("Images/bnh_default.png");
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] == NULL) {
 		printf("Failed to load default image! \n");
 		return false;
 	}
 
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] = loadSurface("Images/bnh_up.bmp");
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] = loadSurface("Images/bnh_up.png");
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] == NULL) {
 		printf("Failed to load up image! \n");
 		return false;
 	}
 
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] = loadSurface("Images/bnh_left.bmp");
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] = loadSurface("Images/bnh_left.png");
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] == NULL) {
 		printf("Failed to load left image! \n");
 		return false;
 	}
 
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] = loadSurface("Images/bnh_right.bmp");
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] = loadSurface("Images/bnh_right.png");
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] == NULL) {
 		printf("Failed to load right image! \n");
 		return false;
 	}
 
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] = loadSurface("Images/bnh_down.bmp");
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] = loadSurface("Images/bnh_down.png");
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] == NULL) {
 		printf("Failed to load down image! \n");
 		return false;
@@ -157,7 +166,7 @@ SDL_Surface* loadSurface(string path) {
 	// The optimized surface we will return
 	SDL_Surface* optimizedSurface = NULL;
 	// Load the image BMP via a string path
-	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
+	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 	if (loadedSurface == NULL) {
 		printf("Error while loading BMP file at %s, SDL_GetError: %s \n", path.c_str(), SDL_GetError());
 	}
@@ -182,11 +191,11 @@ void close() {
 			g_keyPressSurfaces[i] = NULL;
 		}
 	}
-
 	// Clean up our window
 	SDL_DestroyWindow(g_window);
 	g_window = NULL;
-
+	// Clean up SDL_image
+	IMG_Quit();
 	// Clean up SDL
 	SDL_Quit();
 }
