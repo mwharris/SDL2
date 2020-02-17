@@ -8,31 +8,15 @@ using std::string;
 
 // Forward declare functions to be used in main();
 bool init();
-bool loadMedia();
 void close();
-SDL_Texture* loadTexture(string path);
 
 // Screen dimension constants
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 
-// Key press value to surface constants
-enum KeyPressSurfaces {
-	KEY_PRESS_SURFACE_DEFAULT,
-	KEY_PRESS_SURFACE_UP,
-	KEY_PRESS_SURFACE_DOWN,
-	KEY_PRESS_SURFACE_LEFT,
-	KEY_PRESS_SURFACE_RIGHT,
-	KEY_PRESS_SURFACE_TOTAL
-};
-
 // Global variables for the window and window surface
 SDL_Window* g_window = NULL;
-SDL_Texture* g_currentTexture = NULL;
 SDL_Renderer* g_renderer = NULL;
-
-// Surfaces tied to key press inputs
-SDL_Texture* g_keyPressSurfaces[KEY_PRESS_SURFACE_TOTAL];
 
 
 int main(int argc, char* args[]) {
@@ -41,51 +25,43 @@ int main(int argc, char* args[]) {
 		return -1;
 	}
 	else {
-		if (!loadMedia()) {
-			return -1;
-		}
-		else {
-			bool quit = false;
-			SDL_Event event;
+		bool quit = false;
+		SDL_Event event;
 
-			// Set our default image
-			g_currentTexture = g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
-
-			// Game loop
-			while (!quit) {
-				// Event poller
-				while (SDL_PollEvent(&event) != 0) {
-					if (event.type == SDL_QUIT) {
-						quit = true;
-					}
+		// Game loop
+		while (!quit) {
+			// Event poller
+			while (SDL_PollEvent(&event) != 0) {
+				if (event.type == SDL_QUIT) {
+					quit = true;
 				}
-				// Clear the screen
-				SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
-				SDL_RenderClear(g_renderer);
-
-				// Render a red quad
-				SDL_Rect fillRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-				SDL_SetRenderDrawColor(g_renderer, 255, 0, 0, 255);
-				SDL_RenderFillRect(g_renderer, &fillRect);
-
-				// Render a green quad
-				fillRect = { SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3 };
-				SDL_SetRenderDrawColor(g_renderer, 0, 255, 0, 255);
-				SDL_RenderDrawRect(g_renderer, &fillRect);
-
-				// Draw a blue horizontal line
-				SDL_SetRenderDrawColor(g_renderer, 0, 0, 255, 255);
-				SDL_RenderDrawLine(g_renderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
-
-				// Draw a vertical line of yellow dots
-				SDL_SetRenderDrawColor(g_renderer, 0, 255, 255, 255);
-				for (int i = 0; i < SCREEN_HEIGHT; i += 4) {
-					SDL_RenderDrawPoint(g_renderer, SCREEN_WIDTH / 2, i);
-				}
-
-				// Update the screen
-				SDL_RenderPresent(g_renderer);
 			}
+			// Clear the screen
+			SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+			SDL_RenderClear(g_renderer);
+
+			// Render a red quad
+			SDL_Rect fillRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
+			SDL_SetRenderDrawColor(g_renderer, 255, 0, 0, 255);
+			SDL_RenderFillRect(g_renderer, &fillRect);
+
+			// Render a green quad
+			fillRect = { SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3 };
+			SDL_SetRenderDrawColor(g_renderer, 0, 255, 0, 255);
+			SDL_RenderDrawRect(g_renderer, &fillRect);
+
+			// Draw a blue horizontal line
+			SDL_SetRenderDrawColor(g_renderer, 0, 0, 255, 255);
+			SDL_RenderDrawLine(g_renderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
+
+			// Draw a vertical line of yellow dots
+			SDL_SetRenderDrawColor(g_renderer, 0, 255, 255, 255);
+			for (int i = 0; i < SCREEN_HEIGHT; i += 4) {
+				SDL_RenderDrawPoint(g_renderer, SCREEN_WIDTH / 2, i);
+			}
+
+			// Update the screen
+			SDL_RenderPresent(g_renderer);
 		}
 	}
 	// Free up our window, surface, anything else
@@ -136,43 +112,7 @@ bool init() {
 	return false;
 }
 
-// Load all of our images
-bool loadMedia() {
-	// We don't need to load images anymore...
-	return true;
-}
-
-SDL_Texture* loadTexture(string path) {
-	// The optimized surface we will return
-	SDL_Texture* texture = NULL;
-	// Load the image via a string path
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-	if (loadedSurface == NULL) {
-		printf("Error while loading file at %s, SDL_GetError: %s \n", path.c_str(), SDL_GetError());
-	}
-	else {
-		// Create a Textures from the Surface we loaded above
-		texture = SDL_CreateTextureFromSurface(g_renderer, loadedSurface);
-		if (texture == NULL) {
-			printf("Error while creating Texture from loaded file at %s, SDL_GetError: %s \n", path.c_str(), SDL_GetError());
-		}
-		// Free the surface that we loaded
-		SDL_FreeSurface(loadedSurface);
-		loadedSurface = NULL;
-	}
-	return texture;
-}
-
 void close() {
-	// Clean up our key press surfaces
-	for (int i = 0; i < KEY_PRESS_SURFACE_TOTAL; i++) {
-		if (g_keyPressSurfaces[i] != NULL) {
-			SDL_DestroyTexture(g_keyPressSurfaces[i]);
-			g_keyPressSurfaces[i] = NULL;
-		}
-	}
-	SDL_DestroyTexture(g_currentTexture);
-	g_currentTexture = NULL;
 	// Clean up our SDL_Renderer
 	SDL_DestroyRenderer(g_renderer);
 	g_renderer = NULL;
