@@ -1,3 +1,8 @@
+/*
+
+COMMENTED OUT FOR NOW BECAUSE I DON'T WANT TO LOSE THIS CODE.
+MOVING ON TO HELLOSQL.CPP TO LEARN OTHER THINGS
+
 // Include SDL functions and datatypes
 #include <SDL.h>
 #include <SDL_image.h>
@@ -52,38 +57,39 @@ int main(int argc, char* args[]) {
 			g_currentTexture = g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
 
 			// Game loop
-			while (!quit) {
+			while (!quit) {				
 				// Event poller
 				while (SDL_PollEvent(&event) != 0) {
 					if (event.type == SDL_QUIT) {
 						quit = true;
 					}
+					else if (event.type == SDL_KEYDOWN) {
+						// Change our shown image based on keyboard input
+						switch (event.key.keysym.sym)
+						{
+						case SDLK_UP:
+							g_currentTexture = g_keyPressSurfaces[KEY_PRESS_SURFACE_UP];
+							break;
+						case SDLK_LEFT:
+							g_currentTexture = g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT];
+							break;
+						case SDLK_RIGHT:
+							g_currentTexture = g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT];
+							break;
+						case SDLK_DOWN:
+							g_currentTexture = g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN];
+							break;
+						default:
+							g_currentTexture = g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
+							break;
+						}
+					}
 				}
-				// Clear the screen
-				SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+				// Clear our window render target and fill with our color
 				SDL_RenderClear(g_renderer);
-
-				// Render a red quad
-				SDL_Rect fillRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-				SDL_SetRenderDrawColor(g_renderer, 255, 0, 0, 255);
-				SDL_RenderFillRect(g_renderer, &fillRect);
-
-				// Render a green quad
-				fillRect = { SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3 };
-				SDL_SetRenderDrawColor(g_renderer, 0, 255, 0, 255);
-				SDL_RenderDrawRect(g_renderer, &fillRect);
-
-				// Draw a blue horizontal line
-				SDL_SetRenderDrawColor(g_renderer, 0, 0, 255, 255);
-				SDL_RenderDrawLine(g_renderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
-
-				// Draw a vertical line of yellow dots
-				SDL_SetRenderDrawColor(g_renderer, 0, 255, 255, 255);
-				for (int i = 0; i < SCREEN_HEIGHT; i += 4) {
-					SDL_RenderDrawPoint(g_renderer, SCREEN_WIDTH / 2, i);
-				}
-
-				// Update the screen
+				// Copy our texture to the target renderer (in this case the screen)
+				SDL_RenderCopy(g_renderer, g_currentTexture, NULL, NULL);
+				// Display our updated render target
 				SDL_RenderPresent(g_renderer);
 			}
 		}
@@ -138,7 +144,36 @@ bool init() {
 
 // Load all of our images
 bool loadMedia() {
-	// We don't need to load images anymore...
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] = loadTexture("Images/bnh_default.png");
+	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] == NULL) {
+		printf("Failed to load default texture image! \n");
+		return false;
+	}
+
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] = loadTexture("Images/bnh_up.png");
+	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] == NULL) {
+		printf("Failed to load texture image! \n");
+		return false;
+	}
+
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] = loadTexture("Images/bnh_left.png");
+	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] == NULL) {
+		printf("Failed to load left texture image! \n");
+		return false;
+	}
+
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] = loadTexture("Images/bnh_right.png");
+	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] == NULL) {
+		printf("Failed to load right texture image! \n");
+		return false;
+	}
+
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] = loadTexture("Images/bnh_down.png");
+	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] == NULL) {
+		printf("Failed to load down texture image! \n");
+		return false;
+	}
+
 	return true;
 }
 
@@ -184,3 +219,5 @@ void close() {
 	// Clean up SDL
 	SDL_Quit();
 }
+
+*/
