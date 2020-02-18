@@ -3,21 +3,28 @@
 #include <SDL_image.h>
 #include <stdio.h>
 #include <string>
+#include "LTexture.h"
 
 using std::string;
 
 // Forward declare functions to be used in main();
 bool init();
+bool loadMedia();
+SDL_Texture* loadTexture(string path);
 void close();
+void setViewport(int x, int y, int w, int h);
 
 // Screen dimension constants
-const int SCREEN_WIDTH = 1280;
-const int SCREEN_HEIGHT = 720;
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
 
-// Global variables for the window and window surface
+// Global variables for the window
 SDL_Window* g_window = NULL;
 SDL_Renderer* g_renderer = NULL;
 
+// Scene Textures
+LTexture g_personTexture;
+LTexture g_backgroundTexture;
 
 int main(int argc, char* args[]) {
 	// Initialize SDL and anything else we need
@@ -25,43 +32,32 @@ int main(int argc, char* args[]) {
 		return -1;
 	}
 	else {
-		bool quit = false;
-		SDL_Event event;
+		if (!loadMedia()) {
+			return -1;
+		}
+		else {
+			bool quit = false;
+			SDL_Event event;
 
-		// Game loop
-		while (!quit) {
-			// Event poller
-			while (SDL_PollEvent(&event) != 0) {
-				if (event.type == SDL_QUIT) {
-					quit = true;
+			// Game loop
+			while (!quit) {
+				// Event poller
+				while (SDL_PollEvent(&event) != 0) {
+					if (event.type == SDL_QUIT) {
+						quit = true;
+					}
 				}
+				// Clear the screen
+				SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 255);
+				SDL_RenderClear(g_renderer);
+
+				// Render our textures
+				g_backgroundTexture.render(0, 0, g_renderer);
+				g_personTexture.render(240, 190, g_renderer);
+
+				// Update the screen
+				SDL_RenderPresent(g_renderer);
 			}
-			// Clear the screen
-			SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
-			SDL_RenderClear(g_renderer);
-
-			// Render a red quad
-			SDL_Rect fillRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-			SDL_SetRenderDrawColor(g_renderer, 255, 0, 0, 255);
-			SDL_RenderFillRect(g_renderer, &fillRect);
-
-			// Render a green quad
-			fillRect = { SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3 };
-			SDL_SetRenderDrawColor(g_renderer, 0, 255, 0, 255);
-			SDL_RenderDrawRect(g_renderer, &fillRect);
-
-			// Draw a blue horizontal line
-			SDL_SetRenderDrawColor(g_renderer, 0, 0, 255, 255);
-			SDL_RenderDrawLine(g_renderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
-
-			// Draw a vertical line of yellow dots
-			SDL_SetRenderDrawColor(g_renderer, 0, 255, 255, 255);
-			for (int i = 0; i < SCREEN_HEIGHT; i += 4) {
-				SDL_RenderDrawPoint(g_renderer, SCREEN_WIDTH / 2, i);
-			}
-
-			// Update the screen
-			SDL_RenderPresent(g_renderer);
 		}
 	}
 	// Free up our window, surface, anything else
@@ -112,15 +108,64 @@ bool init() {
 	return false;
 }
 
+// Load all of our images
+bool loadMedia() {
+	if (!g_personTexture.loadFromFile("Images/foo.png", g_renderer)) {
+		printf("Failed to load texture image! \n");
+		return false;
+	}
+
+	if (!g_backgroundTexture.loadFromFile("Images/background.png", g_renderer)) {
+		printf("Failed to load texture image! \n");
+		return false;
+	}
+
+	return true;
+}
+
+SDL_Texture* loadTexture(string path) {
+	// The optimized surface we will return
+	SDL_Texture* texture = NULL;
+	// Load the image via a string path
+	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
+	if (loadedSurface == NULL) {
+		printf("Error while loading file at %s, SDL_GetError: %s \n", path.c_str(), SDL_GetError());
+	}
+	else {
+		// Create a Textures from the Surface we loaded above
+		texture = SDL_CreateTextureFromSurface(g_renderer, loadedSurface);
+		if (texture == NULL) {
+			printf("Error while creating Texture from loaded file at %s, SDL_GetError: %s \n", path.c_str(), SDL_GetError());
+		}
+		// Free the surface that we loaded
+		SDL_FreeSurface(loadedSurface);
+		loadedSurface = NULL;
+	}
+	return texture;
+}
+
+void setViewport(int x, int y, int w, int h) {
+	SDL_Rect viewportRect;
+	viewportRect.x = x;
+	viewportRect.y = y;
+	viewportRect.w = w;
+	viewportRect.h = h;
+	SDL_RenderSetViewport(g_renderer, &viewportRect);
+}
+
 void close() {
+	// Free our LTextures
+	g_personTexture.free();
+	g_backgroundTexture.free();
+	
 	// Clean up our SDL_Renderer
 	SDL_DestroyRenderer(g_renderer);
 	g_renderer = NULL;
 	// Clean up our window
 	SDL_DestroyWindow(g_window);
 	g_window = NULL;
-	// Clean up SDL_image
+
+	// Clean up subsystems
 	IMG_Quit();
-	// Clean up SDL
 	SDL_Quit();
 }

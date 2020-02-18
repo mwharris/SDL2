@@ -142,7 +142,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="HelloSDL.cpp" />
+    <ClCompile Include="LTexture.cpp" />
     <ClCompile Include="MHARenderer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LTexture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
