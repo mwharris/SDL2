@@ -5,6 +5,11 @@
 #include <string>
 #include "LTexture.h"
 
+// Memory leak detection
+#define _CRTDBG_MAP_ALLOC  
+#include <stdlib.h>  
+#include <crtdbg.h>  
+
 using std::string;
 
 // Forward declare functions to be used in main();
@@ -23,8 +28,8 @@ SDL_Window* g_window = NULL;
 SDL_Renderer* g_renderer = NULL;
 
 // Scene Textures
-LTexture g_personTexture;
-LTexture g_backgroundTexture;
+LTexture g_spriteSheetTexture;
+SDL_Rect g_spriteSheetClips[4];
 
 int main(int argc, char* args[]) {
 	// Initialize SDL and anything else we need
@@ -48,12 +53,37 @@ int main(int argc, char* args[]) {
 					}
 				}
 				// Clear the screen
-				SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 255);
+				SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
 				SDL_RenderClear(g_renderer);
 
-				// Render our textures
-				g_backgroundTexture.render(0, 0, g_renderer);
-				g_personTexture.render(240, 190, g_renderer);
+				// Render our sprites from a single texture
+				g_spriteSheetTexture.render(
+					g_renderer, 
+					0,			
+					0,			
+					&g_spriteSheetClips[0]
+				);
+
+				g_spriteSheetTexture.render(
+					g_renderer, 
+					SCREEN_WIDTH - g_spriteSheetClips[1].w,	
+					0, 
+					&g_spriteSheetClips[1]
+				);
+
+				g_spriteSheetTexture.render(
+					g_renderer, 
+					0, 
+					SCREEN_HEIGHT - g_spriteSheetClips[2].h, 
+					&g_spriteSheetClips[2]
+				);
+
+				g_spriteSheetTexture.render(
+					g_renderer, 
+					SCREEN_WIDTH - g_spriteSheetClips[3].w, 
+					SCREEN_HEIGHT - g_spriteSheetClips[3].h, 
+					&g_spriteSheetClips[3]
+				);
 
 				// Update the screen
 				SDL_RenderPresent(g_renderer);
@@ -110,16 +140,36 @@ bool init() {
 
 // Load all of our images
 bool loadMedia() {
-	if (!g_personTexture.loadFromFile("Images/foo.png", g_renderer)) {
+	// Load the entirety of our sprite sheet
+	if (!g_spriteSheetTexture.loadFromFile(g_renderer, "Images/sprites.png")) {
 		printf("Failed to load texture image! \n");
 		return false;
 	}
+	else {
+		// Upper left sprite
+		g_spriteSheetClips[0].x = 0;
+		g_spriteSheetClips[0].y = 0;
+		g_spriteSheetClips[0].w = 100;
+		g_spriteSheetClips[0].h = 100;
+		
+		// Upper right sprite
+		g_spriteSheetClips[1].x = 100;
+		g_spriteSheetClips[1].y = 0;
+		g_spriteSheetClips[1].w = 100;
+		g_spriteSheetClips[1].h = 100;
 
-	if (!g_backgroundTexture.loadFromFile("Images/background.png", g_renderer)) {
-		printf("Failed to load texture image! \n");
-		return false;
+		// Bottom left sprite
+		g_spriteSheetClips[2].x = 0;
+		g_spriteSheetClips[2].y = 100;
+		g_spriteSheetClips[2].w = 100;
+		g_spriteSheetClips[2].h = 100;
+
+		// Bottom right sprite
+		g_spriteSheetClips[3].x = 100;
+		g_spriteSheetClips[3].y = 100;
+		g_spriteSheetClips[3].w = 100;
+		g_spriteSheetClips[3].h = 100;
 	}
-
 	return true;
 }
 
@@ -154,9 +204,7 @@ void setViewport(int x, int y, int w, int h) {
 }
 
 void close() {
-	// Free our LTextures
-	g_personTexture.free();
-	g_backgroundTexture.free();
+	// TODO: free sprite sheet texture
 	
 	// Clean up our SDL_Renderer
 	SDL_DestroyRenderer(g_renderer);
@@ -168,4 +216,6 @@ void close() {
 	// Clean up subsystems
 	IMG_Quit();
 	SDL_Quit();
+
+	_CrtDumpMemoryLeaks();
 }

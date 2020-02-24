@@ -25,7 +25,7 @@ void LTexture::free()
 	}
 }
 
-bool LTexture::loadFromFile(string path, SDL_Renderer* renderer)
+bool LTexture::loadFromFile(SDL_Renderer* renderer, string path)
 {
 	// Make sure there's no pre-existing texture
 	free();
@@ -61,12 +61,19 @@ bool LTexture::loadFromFile(string path, SDL_Renderer* renderer)
 	return texture_ != NULL;
 }
 
-void LTexture::render(int x, int y, SDL_Renderer* renderer)
+void LTexture::render(SDL_Renderer* renderer, int x, int y, SDL_Rect* clip)
 {
 	// Create a rect to render this image at the location given.
 	// We don't want to stretch the image, so we pass it our width and height.
 	SDL_Rect renderRect = { x, y, width_, height_ };
-	SDL_RenderCopy(renderer, texture_, NULL, &renderRect);
+	// Make sure our source and destination dimensions are the same if we specified a clip
+	if (clip != NULL) 
+	{
+		renderRect.w = clip->w;
+		renderRect.h = clip->h;
+	}
+	// Render source to destination using given Rects
+	SDL_RenderCopy(renderer, texture_, clip, &renderRect);
 }
 
 int LTexture::getHeight()
