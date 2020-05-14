@@ -20,9 +20,9 @@ public:
 	void setColor(Uint8 red, Uint8 green, Uint8 blue);
 
 	// Set blending
-	void setBlendMode(SDL_BlendMode blending);
+	void setBlendMode(SDL_BlendMode blendMode);
 
-	void setAplha(Uint8 alpha);
+	void setAlpha(Uint8 alpha);
 
 	// Render texture at the given point
 	void render(SDL_Renderer* renderer, int x, int y, SDL_Rect* rect = NULL);

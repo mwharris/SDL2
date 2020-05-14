@@ -33,6 +33,16 @@ void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
 	}
 }
 
+void LTexture::setBlendMode(SDL_BlendMode blendMode)
+{
+	SDL_SetTextureBlendMode(texture_, blendMode);
+}
+
+void LTexture::setAlpha(Uint8 alpha)
+{
+	SDL_SetTextureAlphaMod(texture_, alpha);
+}
+
 bool LTexture::loadFromFile(SDL_Renderer* renderer, string path)
 {
 	// Make sure there's no pre-existing texture
