@@ -44,6 +44,11 @@ int main(int argc, char* args[]) {
 			bool quit = false;
 			SDL_Event event;
 
+			// Color modulation components
+			Uint8 r = 255;
+			Uint8 g = 255;
+			Uint8 b = 255;
+
 			// Game loop
 			while (!quit) {
 				// Event poller
@@ -51,10 +56,36 @@ int main(int argc, char* args[]) {
 					if (event.type == SDL_QUIT) {
 						quit = true;
 					}
+					else if (event.type == SDL_KEYDOWN) {
+						switch (event.key.keysym.sym) 
+						{
+							case SDLK_q:
+								r += 32;
+								break;
+							case SDLK_w:
+								g += 32;
+								break;
+							case SDLK_e:
+								b += 32;
+								break;
+							case SDLK_a:
+								r -= 32;
+								break;
+							case SDLK_s:
+								g -= 32;
+								break;
+							case SDLK_d:
+								b -= 32;
+								break;
+						}
+					}
 				}
 				// Clear the screen
 				SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
 				SDL_RenderClear(g_renderer);
+
+				// Modulate and render texture
+				g_spriteSheetTexture.setColor(r, g, b);
 
 				// Render our sprites from a single texture
 				g_spriteSheetTexture.render(
@@ -204,7 +235,8 @@ void setViewport(int x, int y, int w, int h) {
 }
 
 void close() {
-	// TODO: free sprite sheet texture
+	// Free sprite sheet texture
+	g_spriteSheetTexture.free();
 	
 	// Clean up our SDL_Renderer
 	SDL_DestroyRenderer(g_renderer);

@@ -25,6 +25,14 @@ void LTexture::free()
 	}
 }
 
+void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
+{
+	int result = SDL_SetTextureColorMod(texture_, red, green, blue);
+	if (result < 0) {
+		printf("Error while setting texture color modulation, SDL_GetError: %s \n", SDL_GetError());
+	}
+}
+
 bool LTexture::loadFromFile(SDL_Renderer* renderer, string path)
 {
 	// Make sure there's no pre-existing texture
@@ -41,7 +49,7 @@ bool LTexture::loadFromFile(SDL_Renderer* renderer, string path)
 		// Set the image's color key to our transparent color of choice (cyan)
 		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 255, 255));
 
-		// Create a Textures from the Surface we loaded above
+		// Create a Texture from the Surface we loaded above
 		newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
 		if (newTexture == NULL) {
 			printf("Error while creating Texture from loaded file at %s, SDL_GetError: %s \n", path.c_str(), SDL_GetError());
