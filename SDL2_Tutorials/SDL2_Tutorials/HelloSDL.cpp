@@ -28,8 +28,10 @@ SDL_Window* g_window = NULL;
 SDL_Renderer* g_renderer = NULL;
 
 // Scene Textures
-LTexture g_modulatedTexture;
-LTexture g_backgroundTexture;
+const int WALKING_ANIMATION_FRAMES = 4;
+const int ANIMATION_SPEED_MOD = 8;
+SDL_Rect g_spriteClips[WALKING_ANIMATION_FRAMES];
+LTexture g_spriteSheetTexture;
 
 int main(int argc, char* args[]) {
 	// Initialize SDL and anything else we need
@@ -44,8 +46,8 @@ int main(int argc, char* args[]) {
 			bool quit = false;
 			SDL_Event event;
 
-			// Alpha modulation component
-			Uint8 a = 255;
+			// Current animation frame
+			int frame = 0;
 
 			// Game loop
 			while (!quit) {
@@ -54,41 +56,28 @@ int main(int argc, char* args[]) {
 					if (event.type == SDL_QUIT) {
 						quit = true;
 					}
-					else if (event.type == SDL_KEYDOWN) {
-						switch (event.key.keysym.sym) 
-						{
-							case SDLK_w:
-								if (a + 32 > 255) {
-									a = 255;
-								}
-								else {
-									a += 32;
-								}
-								break;
-							case SDLK_s:
-								if (a - 32 < 0) {
-									a = 0;
-								}
-								else {
-									a -= 32;
-								}
-								break;
-						}
-					}
 				}
 				// Clear the screen
 				SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
 				SDL_RenderClear(g_renderer);
 
-				// Render the background first
-				g_backgroundTexture.render(g_renderer, 0, 0);
+				// Determine the current animation frame.
+				// We divide by 8 here in order to only update the animation every 8 game frames.
+				SDL_Rect* currentClip = &g_spriteClips[frame / ANIMATION_SPEED_MOD];
 
-				// Render the foreground, blended
-				g_modulatedTexture.setAlpha(a);
-				g_modulatedTexture.render(g_renderer, 0, 0);
+				// Render the current animation frame
+				g_spriteSheetTexture.render(g_renderer, (SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip);
 
 				// Update the screen
 				SDL_RenderPresent(g_renderer);
+
+				// Update the frame number
+				frame++;
+
+				// Circle the frame number back to 0 after we exhaust all animation frames
+				if (frame / ANIMATION_SPEED_MOD >= WALKING_ANIMATION_FRAMES) {
+					frame = 0;
+				}
 			}
 		}
 	}
@@ -118,7 +107,7 @@ bool init() {
 		}
 		else {
 			// Create our Renderer to render textures to the screen
-			g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
+			g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 			if (g_renderer == NULL) {
 				printf("Error creating the SDL_Renderer! SDL_GetError: %s \n", SDL_GetError());
 			}
@@ -143,18 +132,31 @@ bool init() {
 // Load all of our images
 bool loadMedia() {
 	// Load the front texture that will be alpha blended
-	if (!g_modulatedTexture.loadFromFile(g_renderer, "Images/fadeout.png")) {
+	if (!g_spriteSheetTexture.loadFromFile(g_renderer, "Images/walking.png")) {
 		printf("Failed to load texture image! \n");
 		return false;
 	}
 	else {
-		// Tell the foreground texture that we want to alpha blend it
-		g_modulatedTexture.setBlendMode(SDL_BLENDMODE_BLEND);
-	}
-	// Load the background texture - no blending needed
-	if (!g_backgroundTexture.loadFromFile(g_renderer, "Images/fadein.png")) {
-		printf("Failed to load texture image! \n");
-		return false;
+		// Grab each sprite in our sprite sheet
+		g_spriteClips[0].x = 0;
+		g_spriteClips[0].y = 0;
+		g_spriteClips[0].w = 64;
+		g_spriteClips[0].h = 205;
+
+		g_spriteClips[1].x = 64;
+		g_spriteClips[1].y = 0;
+		g_spriteClips[1].w = 64;
+		g_spriteClips[1].h = 205;
+
+		g_spriteClips[2].x = 128;
+		g_spriteClips[2].y = 0;
+		g_spriteClips[2].w = 64;
+		g_spriteClips[2].h = 205;
+
+		g_spriteClips[3].x = 196;
+		g_spriteClips[3].y = 0;
+		g_spriteClips[3].w = 64;
+		g_spriteClips[3].h = 205;
 	}
 	return true;
 }
@@ -191,9 +193,8 @@ void setViewport(int x, int y, int w, int h) {
 
 void close() {
 	// Free sprite sheet texture
-	g_modulatedTexture.free();
-	g_backgroundTexture.free();
-
+	g_spriteSheetTexture.free();
+	
 	// Clean up our SDL_Renderer
 	SDL_DestroyRenderer(g_renderer);
 	g_renderer = NULL;
