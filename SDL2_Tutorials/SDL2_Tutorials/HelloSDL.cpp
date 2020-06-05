@@ -28,10 +28,7 @@ SDL_Window* g_window = NULL;
 SDL_Renderer* g_renderer = NULL;
 
 // Scene Textures
-const int WALKING_ANIMATION_FRAMES = 4;
-const int ANIMATION_SPEED_MOD = 8;
-SDL_Rect g_spriteClips[WALKING_ANIMATION_FRAMES];
-LTexture g_spriteSheetTexture;
+LTexture g_arrowTexture;
 
 int main(int argc, char* args[]) {
 	// Initialize SDL and anything else we need
@@ -45,9 +42,8 @@ int main(int argc, char* args[]) {
 		else {
 			bool quit = false;
 			SDL_Event event;
-
-			// Current animation frame
-			int frame = 0;
+			double degrees = 0;
+			SDL_RendererFlip flipType = SDL_FLIP_NONE;
 
 			// Game loop
 			while (!quit) {
@@ -56,28 +52,37 @@ int main(int argc, char* args[]) {
 					if (event.type == SDL_QUIT) {
 						quit = true;
 					}
+					else if (event.type == SDL_KEYDOWN) {
+						switch (event.key.keysym.sym) {
+							case SDLK_a:
+								degrees -= 60;
+								break;
+							case SDLK_d:
+								degrees += 60;
+								break;
+							case SDLK_q:
+								flipType = SDL_FLIP_HORIZONTAL;
+								break;
+							case SDLK_w:
+								flipType = SDL_FLIP_VERTICAL;
+								break;
+							case SDLK_e:
+								flipType = SDL_FLIP_NONE;
+								break;
+						}
+					}
 				}
 				// Clear the screen
 				SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
 				SDL_RenderClear(g_renderer);
 
-				// Determine the current animation frame.
-				// We divide by 8 here in order to only update the animation every 8 game frames.
-				SDL_Rect* currentClip = &g_spriteClips[frame / ANIMATION_SPEED_MOD];
-
 				// Render the current animation frame
-				g_spriteSheetTexture.render(g_renderer, (SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip);
+				int x = (SCREEN_WIDTH - g_arrowTexture.getWidth()) / 2;
+				int y = (SCREEN_HEIGHT - g_arrowTexture.getHeight()) / 2;
+				g_arrowTexture.render(g_renderer, x, y, NULL, degrees, NULL, flipType);
 
 				// Update the screen
 				SDL_RenderPresent(g_renderer);
-
-				// Update the frame number
-				frame++;
-
-				// Circle the frame number back to 0 after we exhaust all animation frames
-				if (frame / ANIMATION_SPEED_MOD >= WALKING_ANIMATION_FRAMES) {
-					frame = 0;
-				}
 			}
 		}
 	}
@@ -132,31 +137,9 @@ bool init() {
 // Load all of our images
 bool loadMedia() {
 	// Load the front texture that will be alpha blended
-	if (!g_spriteSheetTexture.loadFromFile(g_renderer, "Images/walking.png")) {
+	if (!g_arrowTexture.loadFromFile(g_renderer, "Images/arrow.png")) {
 		printf("Failed to load texture image! \n");
 		return false;
-	}
-	else {
-		// Grab each sprite in our sprite sheet
-		g_spriteClips[0].x = 0;
-		g_spriteClips[0].y = 0;
-		g_spriteClips[0].w = 64;
-		g_spriteClips[0].h = 205;
-
-		g_spriteClips[1].x = 64;
-		g_spriteClips[1].y = 0;
-		g_spriteClips[1].w = 64;
-		g_spriteClips[1].h = 205;
-
-		g_spriteClips[2].x = 128;
-		g_spriteClips[2].y = 0;
-		g_spriteClips[2].w = 64;
-		g_spriteClips[2].h = 205;
-
-		g_spriteClips[3].x = 196;
-		g_spriteClips[3].y = 0;
-		g_spriteClips[3].w = 64;
-		g_spriteClips[3].h = 205;
 	}
 	return true;
 }
@@ -193,7 +176,7 @@ void setViewport(int x, int y, int w, int h) {
 
 void close() {
 	// Free sprite sheet texture
-	g_spriteSheetTexture.free();
+	g_arrowTexture.free();
 	
 	// Clean up our SDL_Renderer
 	SDL_DestroyRenderer(g_renderer);

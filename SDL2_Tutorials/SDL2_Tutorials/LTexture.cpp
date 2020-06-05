@@ -79,19 +79,19 @@ bool LTexture::loadFromFile(SDL_Renderer* renderer, string path)
 	return texture_ != NULL;
 }
 
-void LTexture::render(SDL_Renderer* renderer, int x, int y, SDL_Rect* clip)
+void LTexture::render(SDL_Renderer* renderer, int x, int y, SDL_Rect* rect, double angle, SDL_Point* center, SDL_RendererFlip flip)
 {
 	// Create a rect to render this image at the location given.
 	// We don't want to stretch the image, so we pass it our width and height.
 	SDL_Rect renderRect = { x, y, width_, height_ };
 	// Make sure our source and destination dimensions are the same if we specified a clip
-	if (clip != NULL) 
+	if (rect != NULL) 
 	{
-		renderRect.w = clip->w;
-		renderRect.h = clip->h;
+		renderRect.w = rect->w;
+		renderRect.h = rect->h;
 	}
 	// Render source to destination using given Rects
-	SDL_RenderCopy(renderer, texture_, clip, &renderRect);
+	SDL_RenderCopyEx(renderer, texture_, rect, &renderRect, angle, center, flip);
 }
 
 int LTexture::getHeight()
