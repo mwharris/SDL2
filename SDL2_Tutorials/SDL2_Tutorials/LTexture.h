@@ -13,6 +13,9 @@ public:
 	// Load image at specified path
 	bool loadFromFile(SDL_Renderer* renderer, std::string path);
 
+	// Creates image from font string
+	bool loadFromRenderedTexture(std::string textureText, SDL_Color textColor);
+
 	// Deallocate memory
 	void free();
 	
